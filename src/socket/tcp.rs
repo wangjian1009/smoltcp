@@ -746,7 +746,11 @@ impl<'a> Socket<'a> {
         let next_ack = self.remote_seq_no + self.rx_buffer.len();
 
         let last_win = (self.remote_last_win as usize) << self.remote_win_shift;
-        let last_win_adjusted = last_ack + last_win - next_ack;
+        let last_win_adjusted = if last_ack + last_win >= next_ack {
+            last_ack + last_win - next_ack
+        } else {
+            0
+        };
 
         Some(u16::try_from(last_win_adjusted >> self.remote_win_shift).unwrap_or(u16::MAX))
     }
